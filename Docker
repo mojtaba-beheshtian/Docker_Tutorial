@@ -1,0 +1,108 @@
+############################################
+install docker
+############################################
+1- install on windows
+2- 
+
+############################################
+1 install on windows
+############################################
+    https://docs.docker.com/engine/installation/windows/
+
+############################################
+2 install on centOS
+############################################
+    https://docs.docker.com/engine/installation/centos/
+
+############################################
+docker command
+############################################G
+#start docker service
+    systemctl start docker.service
+
+# list of machins:
+    docker-machine ls
+
+# show list of enviroment variables
+    docker-machine env default
+
+# help of docker
+    docker --help
+
+#help of ps command
+    docker ps --help
+    docker help ps
+
+#list of just containers id
+    docker ps -aq
+
+#start machine of docker
+    docker run machine-name
+
+#help of run command
+    docker help run
+    docker run --help
+
+#change name of containers
+    docker run --name new-name old-name
+
+#run a container in background and print container id
+    ducker run -d container-id:tag
+    
+NOTE: if the machine name image is avalible in locally system,it will run.but if the machine name image not avalible in local,docker will pull machine name image from docker.com/library (if the machin name image is avalible in docker.com/library)
+
+#show list of images
+    docker images
+
+#display system-wide information
+    docker info
+
+#run a command in a new container
+    docker run container-id
+
+# show state of docker machines
+    docker ps
+
+#show all containers
+    docker ps -a
+
+#remove a containers
+    docker rm container-id
+
+#remove all containers
+    docker rm $(docker ps -aq)
+
+#list of images
+    docker images
+
+#list just images id
+    docker images -q
+
+
+#search a container from docker hub
+    docker search ubuntu
+
+# download a container from docker hub
+    docker pull ubuntu
+
+#remove a docker image 
+    docker rmi image-id
+
+#backup from images
+    docker commit old-container-id new-repository:new-tag
+
+#save images to local system
+    docker save -o new-name-of-image-repositore image-repository:tag 
+
+#load images from local sytem to docker
+    docker load -i  name-image-repository
+
+#run a command into a container
+    docker exec -it container-name command
+
+
+
+
+
+
+
