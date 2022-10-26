@@ -1,0 +1,115 @@
+Docker Registry:
+------------------
+Alternative solution: Harbor,nexus
+
+How to deploy image registry?
+-----------------------------
+https://docs.docker.com/registry/deploying/
+
+docker run -d --restart=always --name registry registry:2
+# registry without any tls and authentication
+
+How push images to local repository?
+------------------------------------
+1-
+docker image tag image:tag localhost:5000/image:tag
+2-
+docker image push localhost:5000/image:tag
+
+How pull images from local repository?
+------------------------------------
+docker image pull localhost:5000/image:tag
+
+Run Repository with TLS
+------------------------
+1-
+generate local ssl
+-------------------------
+generate private key
+openssl genrsa -des3 -out server.key 2048 
+#enter password
+
+2-
+openssl rsa -in server.key -out registry.key
+#enter password of server.key
+
+3- create public key:
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout registry.key -out registry.crt
+#country name:
+#province name:
+#location name:
+#organization name:
+#organizational unit name:
+common name: insert your url EXM:test.domain.com
+
+4- create directory and move crt and key file into new file
+mkdir certs
+mv registry.* certs/
+
+5-if registy container run stop registry container 
+docker container stop registry
+
+6-
+docker run -d --restart=always --name registry -v "$(pwd)"/certs:/certs \
+-e REGISTRY_HTTP_ADDR=0.0.0.0:443 -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
+-e REGISTRY_HTTP_TLS_KEY=/certs/registry.key -p 443:443 registry:2
+7- add new domain to hosts list docker host
+vi /etc/hosts
+localhost	test.domain.com
+
+8- change tag of containers that you want to push to local repository
+docker image tag app:v1 test.domain.com:443/app1:v1
+
+9-
+docker push test.domain.com:443/app1:v1
+
+docker push How to install certificate chain on linux:
+------------------------------------------
+yum install ca-certificates
+update-ca-trust force-enable
+cp certs/registry.crt /etc/pki/ca-trust/source/anchors/
+update-ca-trust extract
+
+Create Repository with authentication
+---------------------------------------
+1-
+create user and password hashing in file for login to registry with user and password
+---------------------------------------------------------------------------------------
+docker run --entrypoint htpasswd httpd:2 -Bbn amin Aa111111 > auth/htpasswd
+
+2-if registy container run stop registry container 
+docker container stop registry
+
+3-
+docker run -d \
+  -p 443:443 \
+  --restart=always \
+  --name registry \
+  -v "$(pwd)"/auth:/auth \
+  -e "REGISTRY_AUTH=htpasswd" \
+  -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
+  -e REGISTRY_HTTP_ADDR=0.0.0.0:443 \
+  -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+  -v "$(pwd)"/certs:/certs \
+  -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt \
+  -e REGISTRY_HTTP_TLS_KEY=/certs/registry.key \
+  registry:2
+
+4- fist login to local repository:
+docker login test.domain.com
+user:
+password:
+
+5-
+docker push test.domain.com:443/app1:v1
+
+How to install harbor?
+----------------------
+https://goharbor.io/docs/1.10/install-config/quick-install-script/
+
+
+how to check image history?
+---------------------------
+ docker image history appnginx:v1
+#show all action do in image
+

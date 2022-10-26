@@ -1,0 +1,68 @@
+docker Image multistage 
+########################
+
+Example for multistage build:
+-----------------------------
+
+code file: hello.c
+--------
+#include <stdio.h>
+int main (void)
+{
+printf("Hello,world!\n");
+ return 0;
+}
+
+Dockerfile ( Without multistage )
+----------
+FROM alpine:3.7
+RUN apk update && apk add --update alpine-sdk
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
+RUN mkdir bin
+RUN gcc -Wall hello.c -o bin/hello
+CMD /app/bin/hello
+
+Dockerfile ( multistage )
+-----------
+FROM alpine:3.7 AS build
+RUN apk update && apk add --update alpine-sdk && mkdir /app
+WORKRIR /app
+COPY . .
+RUN mkdir bin
+RUN gcc -Wall hello.c -o bin/hello
+FROM alpine:3.7
+COPY --from=build /app/bin/hello /app/hello
+CMD /app/hello
+
+EXM: for java file
+code file: hello.java
+-----------
+class Hello{
+public static void main(String[] args){
+System.out.println("This is java app \n by using Docker");
+}
+}
+
+Dockerfile ( without mutlistage )
+-----------
+FROM java:8
+COPY . /var/www/java
+WORKDIR /var/www/java
+RUN javac hello.java
+CMD ["java", "hello"]
+
+
+Dockerfile ( mutlistage )
+-----------
+FROM java:8 AS build		   #image with runtime and compiler
+COPY . /var/www/java
+WORKDIR /var/www/java
+RUN javac hello.java
+FROM openjdk:18-jdk-alpine3.15      #searche image with just runtime without any compiler
+COPY --from=build /var/www/java/hello.java
+CMD ["java", "hello"]
+
+https://docs.docker.com/develop/develop-images/multistage-build/
+

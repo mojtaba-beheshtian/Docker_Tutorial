@@ -1,0 +1,126 @@
+docker Image
+########################
+
+What images are?
+In images the all layers are immutable ( Read Only )
+Fist layer in all images is Base Image that is linux distro Exm: Centos,Debian,Alpine
+Best image have minimum count of layers
+When create new container from image, add new layer Read/Write and all changes hold in this layer.
+docker container run ---> add extra R/W layer to image
+Best performance for containers are minimum size of Read/Write layer and Data not save in containers.
+
+https://docs.docker.com/storage/storagedriver/
+
+Copy On Write (COW):
+when one proccess of container want to write a config file of image that have in any layers, first give a copy of config file in any layer and in R/W layer and then write in config file.
+
+image creation way:
+-------------------
+1. Dockerfile
+2. pull/push image
+3. save/load image
+4. docker commit
+
+dangling images: images that no name and no tage
+
+docker image prune
+#delete all dangling images
+
+Dockerfile example:
+-----------------------
+FROM python:2.7	  		#name of Base image or distro
+RUN mkdir -p /app 		#run command into Image
+WORKDIR /app	  		#change corrent directory to /app (cd /app)
+COPY main.py .			#copy main.py file from corrent directory of host to corrent directory of image (/app)
+CMD ["python", "main.py"]	#do command after runing container and not run in image
+
+**all command is casensetive
+
+docker image build . -t app:v1
+#create new image from Dockerfile that in current directory and name: app:v1
+
+** name of docker files: Dockerfile and if you want to change it you should use -f in command.
+
+docker image ls
+#list all images
+
+FROM alpine:3.12.1
+RUN apk update && apk add iputils
+CMD ["ping", "8.8.8.8"]
+
+**if you want add more than one RUN, beter used && in first RUN for limited count of image layers. and the end of line used \ for continue commands to next line.
+
+COPY vs ADD:
+-------------------
+ADD content.tar . #first unzip content.tar and then copy contant from host to corrent directory image.
+COPY conent.tar . #copy file conent.tar to corrent directory image
+
+ADD http://example.com/content.tar .
+
+Practice:
+
+	Base Image: alpine:3.12.1
+		  : apk add nginx
+		  : mkdir -p /run/nginx
+	Copy web content to /usr/share/nginx/html
+	Copy web config to /etc/nginx/conf.d/
+	Run default command : nginx -g daemon off;
+
+FROM alpine:3.12.1
+RUN apk add nginx && mkdir -p /run/nginx
+ADD --chown=1000:1000 index.tar /usr/share/nginx/html #change owner of file in image.
+COPY default.conf /etc/nginx/conf.d/
+CMD ["nging", "-g", "daemon off;"]
+
+docker image inspect
+#show all details of image EXM: show list all CMDs and all layers details.
+
+CMD vs ENTRYPOINT
+-----------------
+ENTRYPOINT -----> command
+CMD ------------> Parameter
+1.
+ENTRYPOINT ["ping"]
+CMD ["8.8.8.8"]
+
+2.
+ENTRYPOINT ["ping", "8.8.8.8"]
+3.
+CMD ["ping", "8.8.8.8"]
+
+EXM:
+FROM alpine:3.12.1
+RUN apk update && apk add iputils
+ENTRYPOINT ["ping"]
+CMD ["8.8.8.8"]
+
+**when you run container from this image you can change CMD (Parameter) but you cant
+change ENTRYPOINT (command).
+
+Shell Form vs Exec Form
+------------------------
+CMD ["ping", "8.8.8.8"]    ----> exec form
+CMD ping 8.8.8.8           ----> shell form
+
+/bin/sh -c ping 8.8.8.8 -----> shell form = pid1 = sh
+ping 8.8.8.8            -----> exec form  = pid1 = ping
+
+How to save/load docker images?
+-------------------------------
+docker image save hello:v2 > helloapp.tar
+docker image save hello:v2 -o helloapp.tar
+
+docker image load < helloapp.tar
+docker image load -i helloapp.tar
+
+How to create an image from running container?
+---------------------------------------
+docker container commit app3 appnginx:v1
+
+docker image tag appnginx:v1 Beheshtian/appv1
+#copy from image name=appnginx:v1 to Beheshtian/appv1
+
+docker login
+docker image push Beheshtian/appv1
+#push image to docker hub
+
