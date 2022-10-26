@@ -1,18 +1,22 @@
+Refrence:
+https://docs.docker.com/
+
 ############################################
 install docker
 ############################################
-1- install on windows
-2- 
 
-############################################
-1 install on windows
-############################################
-    https://docs.docker.com/engine/installation/windows/
+Install Docker Engine on CentOS
+---------------------------------
+https://docs.docker.com/engine/install/centos/
 
-############################################
-2 install on centOS
-############################################
-    https://docs.docker.com/engine/installation/centos/
+Set up the repository
+Install the yum-utils package (which provides the yum-config-manager utility) and set up the repository.
+
+
+ sudo yum install -y yum-utils
+ sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
 
 ############################################
 docker command
