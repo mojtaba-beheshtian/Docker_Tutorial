@@ -1,0 +1,172 @@
+
+
+docker container run alpine sleep 2000
+       context:	     
+	container
+	image
+	volume
+	network
+
+		Action:
+			ls
+			build
+			tag , ....
+
+#run container and do command in in forground
+#for download images from docker hub you should first login to docker hub:
+docker login
+username:
+password:
+
+docker container run -d alpine sleep 2000
+#run container and do command in background and dettache
+
+docker container exec -it #container-name bash
+#attachet to container
+
+docker container ls
+#show list all running containers
+
+docker container ls -a
+#show all container with all status 
+
+
+docker container ls -s
+#show size all running container
+#size: size of writable layer of container and the mount of data that is used for wraitable layer.
+#virtual size: a mount of data used for Real only image plus the container wraitable layer size.
+
+**when two container run from same image, share 100% of the read-only data. then just one space of image used in host.
+
+docker container ls -aq
+#show just 12 first container ID of all running containers
+
+docker container rm --force #container-name
+#remove running container
+
+docker container rm --force $( docker container ls -aq)
+#remove all running container by container id
+
+docker container run -d --name app1 alpine:latest sleep 10
+# run container with your name that you want for container (app1)
+
+docker container stop #container-name
+#stop running container and 10 second late to stop the container beacuse send SIG TERM(15) for container and this signal is weakend signal. ExitedCode is not 0
+#Exited Code=0 means the command done without any errors and success
+
+docker container kill #container-name
+#stop running container force and send SIG KILL(9). ExitedCode is not 0
+
+docker container stop --time 5 #container-name
+#terminate container after 5 seconds?
+
+docker container start app4
+
+docker container restart app4
+
+docker container top app4
+
+docker container stats app4
+#show details of usage resorce of container
+
+docker container inspect #container-name
+#show more detailes of running container in json format
+
+docker container inspect -f "{{ .NetworkSettings.Networks,bridge.IPAddress }}" #container-name
+#show just ip address of container
+
+docker container inspect -f "{{ .State.Status }}" #container-name
+#show just status of container
+
+docker container inspect -f "{{ .Config.Hostname }}" #container-name
+#show just hostname of container
+
+docker container exec -it
+#run command in running container and -i mean interactive: keep STDIN open enen if not attached and -t allocate a pseudo-TTY
+
+docker container exec -it #container-name ps
+# run ps command in running container
+
+docker container exec -it #container-name bash
+# go to command line of running container
+
+docker container prune
+#remove all containers that exited
+
+docker container exec -it --env TEST=docker #container-name bash
+# set enviroment variables for view in container you should run: echo $TEST
+
+** if run container with this command: "docker container run -d --name app1 alpine sleep 30"
+ after run container then do this command: "docker container exec -it app1 sleep 1000" container stoped after 30 second beacuse for container PID=1 is important and other PIDs killed.
+
+docker container exec -it -w /opt (or --workdir) #cotainer-name bash
+#change home directory and working directory inside the container to /opt
+
+docker container exec -it -u test (or --user) #cotainer-name bash
+#change Usarname or UID inside the container tfrom root to test and run command "id" to show default user
+
+**for exit from container to host:
+ 1- exit: kill current bash but container running still
+ 2- CTRL+p CTRL+q: current bash and container running
+
+**best solution for exit from container to hast use command "exit" if you not running any command in current bash.
+
+docker container logs app1
+#show all logs of container. the path of this logs in host:
+ /var/lib/docker/containers/#container-id/#container-id-json.log
+
+docker container logs -f app1
+#follow all logs of container
+
+docker container logs -f --tail 20 app1
+#follow 20 latest logs of container
+
+docker info
+#show details of docker daemon
+
+** for change default path of logs of containers create file: /etc/docker/daemon.json
+   "log-driver": "json-file",
+   "log-opts": {
+     "max-size": "10m",
+     "max-file": "3"
+   }
+systemctl restart docker
+
+ https://docs.docker.com/config/containers/logging/json-file/
+
+** for send logs of all containers to splunk create file: /etc/docker/daemon.json
+{
+   "log-driver": "splunk",
+   "log-opts": {
+     "splunk-token": "",
+     "splunk-url": ""
+   }
+}
+systemctl restart docker
+
+docker container run --log-driver json-file --log-opt max-size=15m #container-name echo helo world
+#change the logging driver for specific container
+
+Help link for docker logging drivers:
+--------------------------------------
+https://docs.docker.com/config/containers/logging/configure/
+
+docker container cp #container-name:SRC-PATH DST-PATH
+# copy from container to host
+
+
+docker container cp SRC-PATH #container-name:DST-PATH
+# copy from host to container
+
+docker container run -d --name app3 --restart always #container-name
+#Docker Restart Policy:
+	1. none
+	2. always *
+	3. on-failure
+	4. unless-stoped
+
+https://docs.docker.com/config/containers/start-containers-automatically/
+
+docker container update
+#Change resouece of online container orr change restart policy
+
