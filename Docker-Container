@@ -1,6 +1,4 @@
-
-
-docker container run alpine sleep 2000
+docker container run -d --name $name alpine sleep 2000
        context:	     
 	container
 	image
@@ -12,7 +10,7 @@ docker container run alpine sleep 2000
 			build
 			tag , ....
 
-#run container and do command in in forground
+#run container and do command in in foreground
 #for download images from docker hub you should first login to docker hub:
 docker login
 username:
@@ -21,7 +19,7 @@ password:
 docker container run -d alpine sleep 2000
 #run container and do command in background and dettache
 
-docker container exec -it #container-name bash
+docker container exec -it $container_name bash
 #attachet to container
 
 docker container ls
@@ -41,7 +39,7 @@ docker container ls -s
 docker container ls -aq
 #show just 12 first container ID of all running containers
 
-docker container rm --force #container-name
+docker container rm --force $container_name
 #remove running container
 
 docker container rm --force $( docker container ls -aq)
@@ -50,14 +48,14 @@ docker container rm --force $( docker container ls -aq)
 docker container run -d --name app1 alpine:latest sleep 10
 # run container with your name that you want for container (app1)
 
-docker container stop #container-name
+docker container stop $container_name
 #stop running container and 10 second late to stop the container beacuse send SIG TERM(15) for container and this signal is weakend signal. ExitedCode is not 0
 #Exited Code=0 means the command done without any errors and success
 
-docker container kill #container-name
+docker container kill $container_name
 #stop running container force and send SIG KILL(9). ExitedCode is not 0
 
-docker container stop --time 5 #container-name
+docker container stop --time 5 $container_name
 #terminate container after 5 seconds?
 
 docker container start app4
@@ -69,40 +67,40 @@ docker container top app4
 docker container stats app4
 #show details of usage resorce of container
 
-docker container inspect #container-name
+docker container inspect $container_name
 #show more detailes of running container in json format
 
-docker container inspect -f "{{ .NetworkSettings.Networks,bridge.IPAddress }}" #container-name
+docker container inspect -f "{{ .NetworkSettings.Networks.bridge.IPAddress }}" $container_name
 #show just ip address of container
 
-docker container inspect -f "{{ .State.Status }}" #container-name
+docker container inspect -f "{{ .State.Status }}" $container_name
 #show just status of container
 
-docker container inspect -f "{{ .Config.Hostname }}" #container-name
+docker container inspect -f "{{ .Config.Hostname }}" $container_name
 #show just hostname of container
 
 docker container exec -it
 #run command in running container and -i mean interactive: keep STDIN open enen if not attached and -t allocate a pseudo-TTY
 
-docker container exec -it #container-name ps
+docker container exec -it $container_name ps
 # run ps command in running container
 
-docker container exec -it #container-name bash
+docker container exec -it $container_name sh
 # go to command line of running container
 
 docker container prune
 #remove all containers that exited
 
-docker container exec -it --env TEST=docker #container-name bash
+docker container exec -it --env TEST=docker $container_name bash
 # set enviroment variables for view in container you should run: echo $TEST
 
 ** if run container with this command: "docker container run -d --name app1 alpine sleep 30"
  after run container then do this command: "docker container exec -it app1 sleep 1000" container stoped after 30 second beacuse for container PID=1 is important and other PIDs killed.
 
-docker container exec -it -w /opt (or --workdir) #cotainer-name bash
+docker container exec -it -w /opt (or --workdir) $container_name bash
 #change home directory and working directory inside the container to /opt
 
-docker container exec -it -u test (or --user) #cotainer-name bash
+docker container exec -it -u test (or --user) $container_name bash
 #change Usarname or UID inside the container tfrom root to test and run command "id" to show default user
 
 **for exit from container to host:
@@ -120,6 +118,18 @@ docker container logs -f app1
 
 docker container logs -f --tail 20 app1
 #follow 20 latest logs of container
+
+docker container commit $container_name	
+#Create a new image from a container’s changes
+
+docker container attach	$container_name
+#Attach local standard input, output, and error streams to a running container
+
+docker container diff $container_name	
+#Inspect changes to files or directories on a container’s filesystem
+
+docker container export	
+#Export a container’s filesystem as a tar archive
 
 docker info
 #show details of docker daemon
@@ -144,26 +154,27 @@ systemctl restart docker
 }
 systemctl restart docker
 
-docker container run --log-driver json-file --log-opt max-size=15m #container-name echo helo world
+docker container run --log-driver json-file --log-opt max-size=15m $container_name echo helo world
 #change the logging driver for specific container
 
 Help link for docker logging drivers:
 --------------------------------------
 https://docs.docker.com/config/containers/logging/configure/
 
-docker container cp #container-name:SRC-PATH DST-PATH
+docker container cp $container_name:SRC-PATH DST-PATH
 # copy from container to host
 
 
-docker container cp SRC-PATH #container-name:DST-PATH
+docker container cp SRC-PATH $container_name:DST-PATH
 # copy from host to container
 
-docker container run -d --name app3 --restart always #container-name
+docker container run -d --name app3 --restart always $container_name
+
 #Docker Restart Policy:
-	1. none
-	2. always *
-	3. on-failure
-	4. unless-stoped
+1. no: Do not automatically restart the container. (the default)
+2. always *: Always restart the container if it stops. If it is manually stopped, it is restarted only when Docker daemon restarts or the container itself is manually restarted.
+3. on-failure: Restart the container if it exits due to an error, which manifests as a non-zero exit code.
+4. unless-stoped: Similar to always, except that when the container is stopped (manually or otherwise), it is not restarted even after Docker daemon restarts.
 
 https://docs.docker.com/config/containers/start-containers-automatically/
 

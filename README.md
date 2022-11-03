@@ -7,17 +7,17 @@ Docker is an open platform for developing, shipping, and running applications. D
 Why Use Docker?
 -------------------
 1. Enables Efficient Use Of Resources
-2. Faster Software Delivery Cycles
+2. Faster Software Delivery and update Cycles
 3. Application Portability
 
 Isolate Namespaces in Docker
 --------------------------------
-* Net: network of every container is isolate
-* Pid: proccess of every container is isolate
-* Mnt: mountpoint of every container is isolate
-* User: Users of every container is isolate
-* UTS: Hostname of every container is isolate
-* IPC: the process will have an independent namespace for system
+1. Net: network of every container is isolate
+2. Pid: proccess of every container is isolate
+3. Mnt: mountpoint of every container is isolate
+4. User: Users of every container is isolate
+5. UTS: Hostname of every container is isolate
+6. IPC: the process will have an independent namespace for system
 
 cgroups: isolate resources
 
