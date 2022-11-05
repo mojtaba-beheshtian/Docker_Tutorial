@@ -79,6 +79,7 @@ CMD vs ENTRYPOINT
 -----------------
 ENTRYPOINT -----> command
 CMD ------------> Parameter
+
 1.
 ENTRYPOINT ["ping"]
 CMD ["8.8.8.8"]
