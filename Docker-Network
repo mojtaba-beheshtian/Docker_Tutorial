@@ -1,0 +1,70 @@
+Network Concepts:
+----------------
+CNM (Container Network Model):
+Sandbox: isolates a container from the outside world
+Endpoint: controlled gateway from the outside world into the sandbox network
+Network : is a pathway that transports the data packets 
+IPAM: IP Address Management
+
+Network Drivers
+-----------------
+CNM Implementation
+------------------
+Netwok	Company	Scope	Description
+------	-------	-----	-----------
+Bridge	Docker	Local	The default network driver, Simple network based on linux bridges
+Host	Docker	Local	Share host and container net namespace
+None	Docker		Compeletly isolated from the outside
+Overlay	Docker	Global	connect multiple Docker daemons together
+ipvlan			give users total control over both IPv4 and IPv6 addressing.
+macvlan			allow you to assign a MAC address to a container
+Network plugins		You can install and use third-party network plugins
+
+Bridge Network
+=================
+
+default Network Bridge
+------------------------
+** In default Network Bridge file /etc/resolv.conf host copy to containers that mean you can't ping hostname of other containers from each containers.
+
+User Defined Bridge
+--------------------
+docker network create --driver bridge alpine-net
+
+** Containers on this network can resolve hostname of others beacaus used of nameserver engine docker(DNS Server local): 127.0.0.11
+
+**when create container you can connected container to just one network.
+
+docker container run -d --name app1 --network mynet1 alpine ping 8.8.8.8
+
+docker network connect mynet2 app4
+
+docker network disconnect mynet2 app4
+
+docker network create --subnet=10.25.16.0/24 --ip-range=10.25.16.0/24 --gateway=10.25.16.1 mynet3
+
+ingress traffic ---> Blocked #incoming
+egress traffic ----> Allowed #outgoing
+
+Host Network
+==============
+This series of tutorials deals with networking standalone containers which bind directly to the Docker host’s network, with no network isolation.
+The host networking driver only works on Linux hosts, and is not supported on Docker Desktop for Mac, Docker Desktop for Windows, or Docker EE for Windows Server.
+
+docker container run -d --name app5 --network host alpine ping 8.8.8.8
+
+connect a container to other container's net namespace (same network config)
+-----------------------------------------------------------------------------
+docker container run -d --name app8 --network container:app7 alpine ping 8.8.8.8
+
+docker container run -d --name web -p 192.168.1.2:8080:80 nginx:latest
+#just request of interface 192.168.1.2 and port 8080 of host transfer to port 80 of container
+
+Overlay Network
+=================
+This series of tutorials deals with networking for swarm services.
+
+default overlay network
+-------------------------
+
+
