@@ -64,7 +64,103 @@ Overlay Network
 =================
 This series of tutorials deals with networking for swarm services.
 
-default overlay network
--------------------------
+When you initialize a swarm or join a Docker host to an existing swarm, two new networks are created on that Docker host:
 
+* an overlay network called ingress, which handles the control and data traffic related to swarm services. When you create a swarm service and do not connect it to a user-defined overlay network, it connects to the ingress network by default.
+* a bridge network called docker_gwbridge, which connects the individual Docker daemon to the other daemons participating in the swarm.
+
+Prerequisites:
+-------------------
+You need the following ports open to traffic to and from each Docker host participating on an overlay network:
+
+* TCP port 2377 for cluster management communications
+* TCP and UDP port 7946 for communication among nodes
+* UDP port 4789 for overlay network traffic
+
+To create an overlay network for use with swarm services, use a command like the following: (On manager, create a new overlay network, You don’t need to create the overlay network on the other nodes, because it will be automatically created when one of those nodes starts running a service task which requires it.) 
+
+ docker network create -d overlay my-overlay
+
+To create an overlay network which can be used by swarm services or standalone containers to communicate with other standalone containers running on other Docker daemons, add the --attachable flag:
+
+ docker network create -d overlay --attachable my-attachable-overlay
+
+You can specify the IP address range, subnet, gateway, and other options.
+
+Encrypt traffic on an overlay network
+---------------------------------------
+All swarm service management traffic is encrypted by default, using the AES algorithm in GCM mode. Manager nodes in the swarm rotate the key used to encrypt gossip data every 12 hours.
+
+To encrypt application data as well, add --opt encrypted when creating the overlay network. This enables IPSEC encryption at the level of the vxlan.
+
+When you enable overlay encryption, Docker creates IPSEC tunnels between all the nodes where tasks are scheduled for services attached to the overlay network. These tunnels also use the AES algorithm in GCM mode and manager nodes automatically rotate the keys every 12 hours.
+
+Customize the default ingress network
+--------------------------------------
+Customizing the ingress network involves removing and recreating it. This is usually done before you create any services in the swarm. If you have existing services which publish ports, those services need to be removed before you can remove the ingress network.
+
+1. Inspect the ingress network using docker network inspect ingress, and remove any services whose containers are connected to it.
+
+2. Remove the existing ingress network:
+
+ docker network rm ingress
+
+3. Create a new overlay network using the --ingress flag:
+
+ docker network create \
+  --driver overlay \
+  --ingress \
+  --subnet=10.11.0.0/16 \
+  --gateway=10.11.0.2 \
+  --opt com.docker.network.driver.mtu=1200 \
+  my-ingress
+
+4. Restart the services that you stopped in the first step. 
+
+Customize the docker_gwbridge interface
+----------------------------------------
+The docker_gwbridge is a virtual bridge that connects the overlay networks (including the ingress network) to an individual Docker daemon’s physical network.
+If you need to customize its settings, you must do so before joining the Docker host to the swarm, or after temporarily removing the host from the swarm.
+
+1. Stop Docker.
+
+2. Delete the existing docker_gwbridge interface.
+
+ sudo ip link set docker_gwbridge down
+ sudo ip link del dev docker_gwbridge
+
+3. Start Docker. Do not join or initialize the swarm.
+
+4. Create or re-create the docker_gwbridge bridge manually:
+
+ docker network create \
+ --subnet 10.11.0.0/16 \
+ --opt com.docker.network.bridge.name=docker_gwbridge \
+ --opt com.docker.network.bridge.enable_icc=false \
+ --opt com.docker.network.bridge.enable_ip_masquerade=true \
+ docker_gwbridge
+
+5. Initialize or join the swarm. Since the bridge already exists, Docker does not create it with automatic settings.
+
+Note: Services can only be created on a manager node and not need to create in all workers.
+
+change networks of runnig service
+----------------------------------
+update the service' network:
+
+ docker service update \
+  --network-add nginx-net-2 \
+  --network-rm nginx-net \
+  my-service
+
+How to expose port
+-------------------
+docker container run -d --name app1 -p 8080:80 nginx:latest
+docker container run -d --name app2 -p 192.168.19.200:8080:80 nginx:latest
+
+docker container run -d --name app3 -P nginx:latest 
+#Random Port: 32000 ----=> send to EXPOSED port in dockerfile
+
+docker container run -d --name app2 -p 192.168.19.200:8080:8088/udb web
+#expose udp ports
 
