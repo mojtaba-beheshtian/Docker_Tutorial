@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+ nginx:
+  image: nginx:latest
+  ports:
+   - 80:80
+  volumes:
+   - nginx-content:/usr/share/nginx/html
+   - nginx-config:/etc/nginx/conf.d/
+  networks:
+   - frontend
+  restart: always
+  depends_on:
+   - php-fpm
+   - db
+
+ php-fpm:
+  image: php:fpm-alpine3.12
+  container_name: php-fpm
+  depends_on:
+   - db
+  networks:
+   - frontend
+   - backend
+  volumes:
+   - nginx-content:/usr/share/nginx/html
+
+ db:
+  image: mysql:latest
+  container_name: db
+  networks:
+   - backend
+  volumes:
+   - mysql-content:/var/lib/mysql
+  restart: always
+  environment:
+   MYSQL_ROOT_PASSWORD: 123
+   MYSQL_DATABASE: mydb
+   MYSQL_PASSWORD: 123
+
+volumes:
+ nginx-content:
+  external: true
+ nginx-config:
+  external: true
+ mysql-content:
+  external: true
+
+networks:
+ frontend:
+  external: true
+ backend:
+  external: true
