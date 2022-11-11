@@ -7,3 +7,24 @@ Compose is a tool for defining and running multi-container Docker applications. 
 * Run a one-off command on a service
 
 The Compose file is a YAML file defining services, networks, and volumes for a Docker application.
+
+docker-compose up -d
+
+docker-compose down
+
+docker-compose ps
+#show list containers that up with docker-compose
+
+docker-compose up --scale web=3 -d
+#scale one of or more services	 if dont have any port expose and dont have container_name in compose file.
+
+The docker compose run command allows you to run one-off commands for your services:
+
+ docker compose run web env
+
+Pass --volumes to also remove the data volume used by the Redis container:
+
+
+ docker compose down --volumes
+
+

@@ -1,3 +1,8 @@
 To deploy an application image when Docker Engine is in swarm mode, you create a service. Frequently a service is the image for a microservice within the context of some larger application. Examples of services might include an HTTP server, a database, or any other type of executable program that you wish to run in a distributed environment.
 
+docker service create --replicas 2 --name apps nging:latest
+
+docker service ls
+
+docker service scale apps=6
 
