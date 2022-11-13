@@ -52,9 +52,6 @@ The output includes the commands to join new nodes to the swarm. Nodes will join
  docker info 
 #view the current state of the swarm
 
- docker node ls
-#view information about nodes
-
  docker swarm join --tocken ... $manager_addr:2377
 #create a worker node joined to the existing swarm
 
@@ -64,14 +61,108 @@ The output includes the commands to join new nodes to the swarm. Nodes will join
  docker swarm join-token manager
 #If you don’t have the command available, you can run the following command on a manager node to retrieve the join command for a manager
 
+docker swarm join-token manager --rotate
+#create new token for all manager nodes 
+
+docker swarm join-token worker --rotate
+#create new token for all worker nodes
+
+docker swarm leave
+#this command should be run in worker nodes for leave the cluster.
+
+** from master node you can delete worker nodes but this action isn't good solution for reconcilation loop.
+
+docker node
+=============
+
+docker node ls
+---------------
+view information about nodes. This is a cluster management command, and must be executed on a swarm manager node.
+
+options:
+--filter , -f		Filter output based on conditions provided
+--format		Pretty-print nodes using a Go template
+--quiet , -q		Only display IDs
+
+Filtering:
+The currently supported filters are:
+* id: The id filter matches all or part of a node’s id.
+* label: 
+* node.label:
+* membership: matches nodes based on the presence of a membership and a value "accepted" or "pending".
+* name
+* role
+ 
+Example: 
+ docker node ls -f node.label=region -f "membership=accepted" -f "role=manager"
+
+docker node promote
+---------------------
+Promote one or more nodes to manager in the swarm. This is a cluster management command, and must be executed on a swarm manager node.
+
+docker node ps
+---------------
+List tasks running on one or more nodes, also show DESIRED STATE and CURRENT STATE of service. defaults to current node. This is a cluster management command, and must be executed on a swarm manager node.
+The desired-state filter can take the values "running", "shutdown" or "accepted".
+
+docker node rm
+---------------
+Remove one or more nodes from the swarm. This is a cluster management command, and must be executed on a swarm manager node.
+
+A manager node must be demoted to a worker node (using docker node demote) before you can remove it from the swarm.
+
+docker node update
+--------------------
+Update metadata about a node, such as its availability, labels, or roles. must be executed on a swarm manager node.
+
+options:
+--availability		Availability of the node ("active"|"pause"|"drain")
+--label-add		Add or update a node label (key=value)
+--label-rm		Remove a node label if exists
+--role			Role of the node ("worker"|"manager")
+
+Example:
+ docker node update --availability drain --label-add test $worker1
+
+docker node demote
+------------------
+Demote one or more nodes from manager in the swarm.This is a cluster management command, and must be executed on a swarm manager node. 
+
+Example:
+ docker node demote $node_name
+
+docker node inspect
+---------------------
+Display detailed information on one or more nodes. This is a cluster management command, and must be executed on a swarm manager node.
+
+Example:
+ docker node inspect --format '{{ .ManagerStatus.Leader }}' $node_name
+ docker node inspect --format=pretty $node_name
+
 Deploy a service to the swarm
--------------------------------
-After you create a swarm, you can deploy a service to the swarm.
+===============================
+After you create a swarm, you can deploy a service to the swarm. This is a cluster management command, and must be executed on a swarm manager node.
 
+docker service create
+----------------------
+Creates a service as described by the specified parameters. This is a cluster management command, and must be executed on a swarm manager node.
+ 
  docker service create --replicas 1 --name test alpine ping docker.com
-#create and run new service on manager node
+  docker service create --mode global --name redis2 redis:3.0.6
 
- docker service ls
+Create a service using an image on a private registry
+------------------------------------------------------
+1. 
+ docker login registry.example.com
+2.
+ docker service create \
+   --with-registry-auth \
+   --name my_service \
+   registry.example.com/acme/my_image:latest
+
+
+docker service ls
+------------------
 #see the list of running services
 
  docker service inspect --pretty <SERVICE-ID>
@@ -80,5 +171,5 @@ After you create a swarm, you can deploy a service to the swarm.
  docker service ps <SERVICE-ID>
 #see which nodes are running the service
 
-
+docker service scale apps=6
 
