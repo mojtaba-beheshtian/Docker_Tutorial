@@ -8,22 +8,51 @@ Compose is a tool for defining and running multi-container Docker applications. 
 
 The Compose file is a YAML file defining services, networks, and volumes for a Docker application.
 
-docker-compose up -d
+docker compose up
+------------------
+docker-compose -f $compose_file up -d
+#Use the -f flag to specify the location of a Compose configuration file.
 
-docker-compose down
+docker compose run
+--------------------
+docker compose run web env
+#The docker compose run command allows you to run one-off commands for your services
 
-docker-compose ps
+docker compose -f docker-compose.yml -f docker-compose.admin.yml run backup_db
+#Commands you use with run start in new containers with configuration defined by that of the service, including volumes, links, and other details.
+
+docker compose down
+--------------------
+
+docker compose ps
+-------------------
 #show list containers that up with docker-compose
+
+docker compose pull
+---------------------
+Pulls an image associated with a service defined in a compose.yaml file, but does not start containers based on those images.
+
+Examples
+suppose you have this compose.yaml:
+
+services:
+  db:
+    image: postgres
+  web:
+    build: .
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+If you run docker compose pull ServiceName in the same directory as the compose.yaml file that defines the service, Docker pulls the associated image. For example, to call the postgres image configured as the db service in our example, you would run docker compose pull db.
 
 docker-compose up --scale web=3 -d
 #scale one of or more services	 if dont have any port expose and dont have container_name in compose file.
 
-The docker compose run command allows you to run one-off commands for your services:
-
- docker compose run web env
-
 Pass --volumes to also remove the data volume used by the Redis container:
-
 
  docker compose down --volumes
 

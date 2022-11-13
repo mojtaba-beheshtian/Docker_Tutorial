@@ -1,0 +1,84 @@
+What is a swarm
+------------------
+A swarm consists of multiple Docker hosts which run in swarm mode and act as managers (to manage membership and delegation) and workers (which run swarm services). A given Docker host can be a manager, a worker, or perform both roles. When you create a service, you define its optimal state (number of replicas, network and storage resources available to it, ports the service exposes to the outside world, and more). Docker works to maintain that desired state. For instance, if a worker node becomes unavailable, Docker schedules that node’s tasks on other nodes. A task is a running container which is part of a swarm service and managed by a swarm manager, as opposed to a standalone container.
+
+Feature highlights
+-------------------
+* Cluster management integrated with Docker Engine.
+* Decentralized design: Instead of handling differentiation between node roles at deployment time, the Docker Engine handles any specialization at runtime.
+* Declarative service model: Docker Engine uses a declarative approach to let you define the desired state of the various services in your application stack.
+* Scaling: When you scale up or down, the swarm manager automatically adapts by adding or removing tasks to maintain the desired state.
+* Desired state reconciliation: The swarm manager node constantly monitors the cluster state and reconciles any differences between the actual state and your expressed desired state.
+* Multi-host networking: The swarm manager automatically assigns addresses to the containers on the overlay network when it initializes or updates the application.
+* Service discovery: Swarm manager nodes assign each service in the swarm a unique DNS name and load balances running containers.
+* Load balancing: You can expose the ports for services to an external load balancer.
+* Secure by default: Each node in the swarm enforces TLS mutual authentication and encryption to secure communications between itself and all other nodes.
+* Rolling updates: At rollout time you can apply service updates to nodes incrementally.
+
+Nodes
+-------
+A node is an instance of the Docker engine participating in the swarm. You can also think of this as a Docker node.
+
+1. Manager nodes also perform the orchestration and cluster management functions required to maintain the desired state of the swarm. Manager nodes elect a single leader to conduct orchestration tasks.
+
+2. Worker nodes receive and execute tasks dispatched from manager nodes. By default manager nodes also run services as worker nodes, but you can configure them to run manager tasks exclusively and be manager-only nodes. An agent runs on each worker node and reports on the tasks assigned to it.
+
+Services and tasks
+--------------------
+A service is the definition of the tasks to execute on the manager or worker nodes. It is the central structure of the swarm system and the primary root of user interaction with the swarm.
+
+* replicated: count of containers diffrent of count of nodes. In the replicated services model, the swarm manager distributes a specific number of replica tasks among the nodes based upon the scale you set in the desired state.
+* global: count of containers must be equal count of nodes(masters and workers). For global services, the swarm runs one task for the service on every available node in the cluster.
+
+Load balancing
+---------------
+The swarm manager uses ingress load balancing to expose the services you want to make available externally to the swarm. The swarm manager can automatically assign the service a PublishedPort or you can configure a PublishedPort for the service. You can specify any unused port. If you do not specify a port, the swarm manager assigns the service a port in the 30000-32767 range.
+
+Getting started with swarm mode
+---------------------------------
+initializing a cluster of Docker Engines in swarm mode
+adding nodes to the swarm
+deploying application services to the swarm
+managing the swarm once you have everything running
+
+Create a swarm
+----------------
+Run the following command to create a new swarm in manager node:
+
+ docker swarm init --advertise-addr <MANAGER-IP>
+
+The output includes the commands to join new nodes to the swarm. Nodes will join as managers or workers depending on the value for the --token flag.
+
+ docker info 
+#view the current state of the swarm
+
+ docker node ls
+#view information about nodes
+
+ docker swarm join --tocken ... $manager_addr:2377
+#create a worker node joined to the existing swarm
+
+ docker swarm join-token worker
+#If you don’t have the command available, you can run the following command on a manager node to retrieve the join command for a worker
+
+ docker swarm join-token manager
+#If you don’t have the command available, you can run the following command on a manager node to retrieve the join command for a manager
+
+Deploy a service to the swarm
+-------------------------------
+After you create a swarm, you can deploy a service to the swarm.
+
+ docker service create --replicas 1 --name test alpine ping docker.com
+#create and run new service on manager node
+
+ docker service ls
+#see the list of running services
+
+ docker service inspect --pretty <SERVICE-ID>
+#display the details about a service. To return the service details in json format, run the same command without the --pretty flag.
+
+ docker service ps <SERVICE-ID>
+#see which nodes are running the service
+
+
+
